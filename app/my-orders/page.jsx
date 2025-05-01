@@ -10,11 +10,14 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useSearchParams, useRouter } from "next/navigation";
 
+// Force dynamic rendering to avoid prerendering issues
+export const dynamic = "force-dynamic";
+
 const MyOrders = () => {
   const { currency, getToken, user } = useAppContext();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const refresh = searchParams.get("refresh");
+  const refresh = searchParams?.get("refresh");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
@@ -22,17 +25,23 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const token = await getToken();
+      if (!token) {
+        console.warn("No token available, skipping fetchOrders");
+        setLoading(false);
+        setPolling(false);
+        return;
+      }
       console.log("Fetching orders with token:", token);
       const { data } = await axios.get("/api/order/list", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("API response:", data);
       if (data.success) {
-        setOrders(data.orders.reverse());
+        setOrders(data.orders ? data.orders.reverse() : []);
         setLoading(false);
         setPolling(false);
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to fetch orders");
         setLoading(false);
         setPolling(false);
       }
@@ -45,28 +54,32 @@ const MyOrders = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      setLoading(true);
-      fetchOrders();
+    if (!user) {
+      console.log("No user available, skipping fetchOrders");
+      setLoading(false);
+      return;
+    }
 
-      if (refresh) {
-        setPolling(true);
-        const maxAttempts = 5;
-        let attempts = 0;
-        const interval = setInterval(() => {
-          attempts += 1;
-          console.log(`Polling attempt ${attempts}`);
-          fetchOrders();
-          if (attempts >= maxAttempts) {
-            clearInterval(interval);
-            setPolling(false);
-            router.replace("/my-orders");
-            console.log("Polling stopped after max attempts");
-          }
-        }, 2000);
+    setLoading(true);
+    fetchOrders();
 
-        return () => clearInterval(interval);
-      }
+    if (refresh) {
+      setPolling(true);
+      const maxAttempts = 5;
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts += 1;
+        console.log(`Polling attempt ${attempts}`);
+        fetchOrders();
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          setPolling(false);
+          router.replace("/my-orders");
+          console.log("Polling stopped after max attempts");
+        }
+      }, 2000);
+
+      return () => clearInterval(interval);
     }
   }, [user, refresh, router]);
 
@@ -83,11 +96,11 @@ const MyOrders = () => {
           ) : (
             <div className="max-w-5xl border-t border-gray-300 text-sm">
               {orders.map((order, index) => {
-                console.log("Order items:", order.items);
-                const totalAmount = order.items.reduce(
-                  (acc, item) => acc + (item.amount || 0) * item.quantity,
+                console.log("Order items:", order?.items);
+                const totalAmount = order?.items?.reduce(
+                  (acc, item) => acc + ((item?.amount || 0) * (item?.quantity || 1)),
                   0
-                );
+                ) || 0;
                 return (
                   <div
                     key={index}
@@ -101,26 +114,32 @@ const MyOrders = () => {
                       />
                       <p className="flex flex-col gap-3">
                         <span className="font-medium text-base">
-                          {order.items
-                            .map((item) =>
-                              item.product
-                                ? `${item.product.name} x ${item.quantity}`
+                          {order?.items
+                            ?.map((item) =>
+                              item?.product?.name
+                                ? `${item.product.name} x ${item.quantity || 1}`
                                 : "Unknown Product"
                             )
-                            .join(", ")}
+                            .join(", ") || "No items"}
                         </span>
-                        <span>Items: {order.items.length}</span>
+                        <span>Items: {order?.items?.length || 0}</span>
                       </p>
                     </div>
                     <div>
                       <p>
-                        <span className="font-medium">{order.address.fullName}</span>
+                        <span className="font-medium">
+                          {order?.address?.fullName || "N/A"}
+                        </span>
                         <br />
-                        <span>{order.address.area}</span>
+                        <span>{order?.address?.area || ""}</span>
                         <br />
-                        <span>{`${order.address.city}, ${order.address.state}`}</span>
+                        <span>
+                          {order?.address?.city && order?.address?.state
+                            ? `${order.address.city}, ${order.address.state}`
+                            : "N/A"}
+                        </span>
                         <br />
-                        <span>{order.address.phoneNumber}</span>
+                        <span>{order?.address?.phoneNumber || "N/A"}</span>
                       </p>
                     </div>
                     <p className="font-medium my-auto">
@@ -134,11 +153,14 @@ const MyOrders = () => {
                     </p>
                     <div>
                       <p className="flex flex-col">
-                        <span>Method: {order.paymentMethod || "Card"}</span>
+                        <span>Method: {order?.paymentMethod || "Card"}</span>
                         <span>
-                          Date: {new Date(order.items[0]?.date).toLocaleDateString()}
+                          Date:{" "}
+                          {order?.items?.[0]?.date
+                            ? new Date(order.items[0].date).toLocaleDateString()
+                            : "N/A"}
                         </span>
-                        <span>Payment: {order.paymentStatus || "Paid"}</span>
+                        <span>Payment: {order?.paymentStatus || "Paid"}</span>
                       </p>
                     </div>
                   </div>
