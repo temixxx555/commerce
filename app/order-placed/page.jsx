@@ -1,45 +1,98 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useAppContext } from "@/context/AppContext";
+import { useSearchParams, useRouter } from "next/navigation";
+import Loading from "@/components/Loading";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import axios from "axios";
-import { assets } from "@/assets/assets";
-import Image from "next/image";
 import toast from "react-hot-toast";
 
+// Force dynamic rendering to avoid prerendering issues
+export const dynamic = "force-dynamic";
+
 const OrderPlaced = () => {
-  const router = useRouter();
+  const { user, getToken } = useAppContext();
   const searchParams = useSearchParams();
-  const session_id = searchParams.get("session_id");
+  const router = useRouter();
+  const sessionId = searchParams?.get("session_id");
+  const [loading, setLoading] = useState(true);
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
 
   useEffect(() => {
-    if (session_id) {
-      const verifySession = async () => {
-        try {
-          const { data } = await axios.post("/api/verify_session", { sessionId: session_id });
-          if (data.success) {
-            toast.success("Order placed successfully!");
-            router.push("/my-orders?refresh=true"); // Add refresh query parameter
-          } else {
-            toast.error(data.message);
-            router.push("/cart");
-          }
-        } catch (error) {
-          toast.error("Failed to verify payment");
-          router.push("/cart");
+    const verifyOrder = async () => {
+      if (!user) {
+        console.log("No user available, redirecting to login");
+        router.push("/login");
+        return;
+      }
+
+      if (!sessionId) {
+        console.warn("No session_id in query params, redirecting to my-orders");
+        router.push("/my-orders");
+        return;
+      }
+
+      try {
+        const token = await getToken();
+        if (!token) {
+          console.warn("No token available, redirecting to login");
+          router.push("/login");
+          return;
         }
-      };
-      verifySession();
-    }
-  }, [session_id, router]);
+
+        console.log("Verifying session with ID:", sessionId);
+        const response = await axios.post(
+          "/api/verify_session",
+          { sessionId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log("Verify session response:", response.data);
+        if (response.data.success) {
+          setOrderConfirmed(true);
+          toast.success("Order placed successfully!");
+          // Redirect to my-orders with refresh after a short delay
+          setTimeout(() => {
+            router.push("/my-orders?refresh=true");
+          }, 2000);
+        } else {
+          toast.error(response.data.message || "Failed to verify order");
+          router.push("/my-orders");
+        }
+      } catch (error) {
+        console.error("Verify order error:", error);
+        toast.error(error.message || "Failed to verify order");
+        router.push("/my-orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifyOrder();
+  }, [user, sessionId, router, getToken]);
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center gap-5">
-      <div className="flex justify-center items-center relative">
-        <Image className="absolute p-5" src={assets.checkmark} alt="" />
-        <div className="animate-spin rounded-full h-24 w-24 border-4 border-t-green-300 border-gray-200"></div>
+    <>
+      <Navbar />
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-6">
+        {loading ? (
+          <Loading />
+        ) : orderConfirmed ? (
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-medium">Order Confirmed!</h1>
+            <p>Your order has been placed successfully.</p>
+            <p>You will be redirected to your orders page shortly...</p>
+          </div>
+        ) : (
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-medium">Order Verification Failed</h1>
+            <p>There was an issue verifying your order. Redirecting to orders...</p>
+          </div>
+        )}
       </div>
-      <div className="text-center text-2xl font-semibold">Order Placed Successfully</div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
