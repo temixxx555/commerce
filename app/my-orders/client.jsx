@@ -1,4 +1,4 @@
-// app/my-orders/page.js (Server Component)
+// app/my-orders/page.tsx (Server Component)
 import MyOrdersClient from './client';
 
 export const dynamic = 'force-dynamic';
