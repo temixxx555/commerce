@@ -26,6 +26,7 @@ const nextConfig = {
   },
   experimental: {
     serverActions: true, // optional if you're using server actions
+    missingSuspenseWithCSRBailout: false, // Disable the CSR bailout error
   },
   output: 'standalone', // allows for dynamic rendering when deployed to Vercel
   reactStrictMode: true,
