@@ -16,10 +16,16 @@ const MyOrders = () => {
   const { currency, getToken, user } = useAppContext();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const refresh = searchParams.get("refresh");
+  const refresh = searchParams?.get("refresh");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Only run client-side
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchOrders = async () => {
     try {
@@ -47,7 +53,8 @@ const MyOrders = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    // Only proceed with data fetching if component is mounted and user exists
+    if (isMounted && user) {
       setLoading(true);
       fetchOrders();
 
@@ -70,7 +77,12 @@ const MyOrders = () => {
         return () => clearInterval(interval);
       }
     }
-  }, [user, refresh, router]);
+  }, [isMounted, user, refresh, router]);
+
+  // Show nothing during SSR
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
