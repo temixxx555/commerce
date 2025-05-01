@@ -10,20 +10,26 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useSearchParams, useRouter } from "next/navigation";
 
-// Force dynamic rendering to avoid prerendering issues
+// Force dynamic rendering to skip prerendering
 export const dynamic = "force-dynamic";
 
 const MyOrders = () => {
-  const { currency, getToken, user } = useAppContext();
+  const { currency, getToken, user } = useAppContext() || {};
   const searchParams = useSearchParams();
   const router = useRouter();
-  const refresh = searchParams?.get("refresh");
+  const refresh = searchParams?.get("refresh") || null;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
 
   const fetchOrders = async () => {
     try {
+      if (!getToken) {
+        console.warn("getToken is undefined, skipping fetchOrders");
+        setLoading(false);
+        setPolling(false);
+        return;
+      }
       const token = await getToken();
       if (!token) {
         console.warn("No token available, skipping fetchOrders");
@@ -36,12 +42,12 @@ const MyOrders = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("API response:", data);
-      if (data.success) {
+      if (data?.success) {
         setOrders(data.orders ? data.orders.reverse() : []);
         setLoading(false);
         setPolling(false);
       } else {
-        toast.error(data.message || "Failed to fetch orders");
+        toast.error(data?.message || "Failed to fetch orders");
         setLoading(false);
         setPolling(false);
       }
@@ -54,6 +60,7 @@ const MyOrders = () => {
   };
 
   useEffect(() => {
+    console.log("MyOrders useEffect - user:", user);
     if (!user) {
       console.log("No user available, skipping fetchOrders");
       setLoading(false);
@@ -81,7 +88,7 @@ const MyOrders = () => {
 
       return () => clearInterval(interval);
     }
-  }, [user, refresh, router]);
+  }, [user, refresh, router, getToken]);
 
   return (
     <>
@@ -143,7 +150,7 @@ const MyOrders = () => {
                       </p>
                     </div>
                     <p className="font-medium my-auto">
-                      {currency}
+                      {currency || "CA$"}
                       {isNaN(totalAmount)
                         ? "N/A"
                         : totalAmount.toLocaleString("en-CA", {
