@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 "use client";
 import React, { useEffect, useState } from "react";
 import { assets } from "@/assets/assets";
@@ -9,8 +10,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useSearchParams, useRouter } from "next/navigation";
 
-// Force dynamic rendering to skip prerendering
-export const dynamic = "force-dynamic";
+
 
 const Orders = () => {
   const { currency, getToken, user } = useAppContext() || {};

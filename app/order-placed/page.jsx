@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "@/context/AppContext";
@@ -8,8 +9,6 @@ import Footer from "@/components/Footer";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// Force dynamic rendering to avoid prerendering issues
-export const dynamic = "force-dynamic";
 
 const OrderPlaced = () => {
   const { user, getToken } = useAppContext();
