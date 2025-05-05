@@ -22,7 +22,8 @@ export async function POST(req) {
 
     await connectDB();
 
-    // Fetch product details from the database and calculate tax
+    // Calculate subtotal and create line items for products
+    let subtotal = 0;
     const lineItems = await Promise.all(
       items.map(async (item) => {
         const product = await Product.findById(item.product);
@@ -30,13 +31,11 @@ export async function POST(req) {
           throw new Error(`Product ${item.product} not found`);
         }
 
-        // Calculate price with 2% tax
-        const basePrice = product.offerPrice;
-        const taxAmount = basePrice * 0.02; // 2% tax
-        const totalPrice = basePrice + taxAmount; // Price including tax
-        const unitAmount = Math.round(totalPrice * 100); // Convert to cents for Stripe
+        // Use base price without tax
+        const unitAmount = Math.round(product.offerPrice * 100); // Convert to cents
+        subtotal += product.offerPrice * item.quantity;
 
-        // Ensure the image is a valid string or array of strings
+        // Handle product images
         let imageUrl = [];
         if (typeof product.image === "string") {
           imageUrl = [product.image];
@@ -53,7 +52,7 @@ export async function POST(req) {
         return {
           price_data: {
             currency: "cad",
-            unit_amount: unitAmount, // Includes 2% tax
+            unit_amount: unitAmount, // Pre-tax price
             product_data: {
               name: product.name,
               images: imageUrl,
@@ -64,6 +63,28 @@ export async function POST(req) {
       })
     );
 
+    // Calculate 2% tax on subtotal
+    const taxRate = 0.02;
+    const taxAmount = subtotal * taxRate;
+    if (taxAmount > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "cad",
+          unit_amount: Math.round(taxAmount * 100), // Tax in cents
+          product_data: {
+            name: "Sales Tax (2%)",
+          },
+        },
+        quantity: 1,
+      });
+    }
+
+    // Validate total from frontend (optional)
+    const expectedTotal = Math.floor((subtotal + taxAmount) * 100) / 100;
+    if (Math.abs(total - expectedTotal) > 0.01) {
+      console.warn(`Total mismatch: Frontend ${total}, Backend ${expectedTotal}`);
+    }
+
     // Get userId from Clerk authentication
     const { userId } = getAuth(req);
 
@@ -72,14 +93,18 @@ export async function POST(req) {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/order-placed?session_id={CHECKOUT_SESSION_ID}`,
-
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/cart`,
+      success_url: `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/order-placed?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/cart`,
       metadata: {
         userId: userId || "",
         addressId: address,
         items: JSON.stringify(items),
       },
+      automatic_tax: { enabled: false }, // Disable Stripe automatic tax
     });
 
     return NextResponse.json({ url: session.url });
@@ -88,4 +113,3 @@ export async function POST(req) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-//try aGAIN

@@ -6,13 +6,21 @@ import { NextResponse } from "next/server";
 export async function GET(request) {
   try {
     const { userId } = getAuth(request);
-    await connectDB()
-    const user = await User.findById(userId)
-    if(!user){
-        return NextResponse.json({success:false, message:"user not found"})
+    if (!userId) {
+      return NextResponse.json({ success: false, message: "Unauthorized" });
     }
-    return NextResponse.json({success:true,user})
+    await connectDB();
+    let user = await User.findById(userId);
+    if (!user) {
+      // Create a new user if not found
+      user = await User.create({
+        _id: userId, // Set _id to Clerk userId
+        cartItems: {}, // Initialize empty cart
+        // Optionally add email, name, imageUrl (see below)
+      });
+    }
+    return NextResponse.json({ success: true, user });
   } catch (error) {
-    return NextResponse.json({success:false, message:error.message})
+    return NextResponse.json({ success: false, message: error.message });
   }
 }

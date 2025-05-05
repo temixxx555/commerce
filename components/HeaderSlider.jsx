@@ -18,7 +18,7 @@ const HeaderSlider = () => {
       title: "J3 party Rentals  Your one-stop party shop,Come lets host your events",
       offer: "",
       buttonText1: "Book now",
-      buttonText2: "Explore Deals",
+      buttonText2: "Find more",
       imgSrc: assets.outdoor,
     },
     {
@@ -26,7 +26,7 @@ const HeaderSlider = () => {
       title: "J3 party Rentals  Your one-stop party shop,Come lets host your events",
       offer: "",
       buttonText1: "Book now",
-      buttonText2: "Learn More",
+      buttonText2: "Find more",
       imgSrc: assets.outdoor2,
     },
   ];
