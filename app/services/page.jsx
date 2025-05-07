@@ -5,8 +5,53 @@ import house from "../../assets/house.jpg";
 import plates from "../../assets/plates.jpg";
 import Image from "next/image";
 import Footer from "@/components/Footer";
+import { useAppContext } from "@/context/AppContext";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Home() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+   const { getToken } = useAppContext();
+  
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+  
+      const formData = {
+        firstName: e.target.firstName.value,
+        lastName: e.target.lastName.value,
+        email: e.target.email.value,
+        message: e.target.message.value,
+        number: e.target.number.value,
+      };
+      console.log(formData);
+  
+      try {
+        const token = await getToken();
+  
+        const response = await fetch("/api/detail/create", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: JSON.stringify(formData),
+        });
+  
+        const data = await response.json();
+        if (data.success) {
+          toast.success(
+            "Your message has been sent! We'll get back to you soon."
+          );
+          e.target.reset();
+        } else {
+          toast.error(
+            data.message || "Failed to send message. Please try again."
+          );
+        }
+      } catch (error) {
+        toast.error("An error occurred. Please try again later.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
   return (
     <div className='flex flex-col w-full'>
       <Navbar />
@@ -131,81 +176,108 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="py-12 bg-gray-50" aria-label="Contact J3 Party Rentals">
-  <div className="px-4 mx-auto max-w-3xl sm:px-6 lg:px-8">
-    <h2 className="mb-8 text-3xl font-bold text-center text-gray-800 md:text-4xl">
-      Get a Quote
-    </h2>
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Add form submission logic here (e.g., API call)
-        alert("Form submitted! (Placeholder)");
-      }}
-    >
-      <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-        <div className="flex flex-col w-full">
-          <label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-            First Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="firstName"
-            name="firstName"
-            required
-            placeholder="Enter your first name"
-            className="w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-          />
-        </div>
-        <div className="flex flex-col w-full">
-          <label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-            Last Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="lastName"
-            name="lastName"
-            required
-            placeholder="Enter your last name"
-            className="w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-          />
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
-          Email <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          placeholder="Enter your email"
-          className="w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="message" className="text-sm font-medium text-gray-700">
-          Event Details
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          rows={4}
-          placeholder="Tell us about your event (e.g., date, location, rental needs)"
-          className="w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
-        />
-      </div>
-      <button
-        type="submit"
-        className="px-6 py-3 mt-4 text-white bg-orange-400 rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-colors"
-      >
-        Submit Quote Request
-      </button>
-    </form>
-  </div>
-</section>
+      <section
+          className='py-12 bg-gray-50'
+          aria-label='Contact J3 Party Rentals'
+        >
+          <div className='px-4 mx-auto max-w-3xl sm:px-6 lg:px-8'>
+            <h2 className='mb-8 text-3xl font-bold text-center text-gray-800 md:text-4xl'>
+              Get a Quote
+            </h2>
+            <form className='flex flex-col gap-6' onSubmit={handleSubmit}>
+              <div className='flex flex-col gap-2 sm:flex-row sm:gap-4'>
+                <div className='flex flex-col w-full'>
+                  <label
+                    htmlFor='firstName'
+                    className='text-sm font-medium text-gray-700'
+                  >
+                    First Name <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    type='text'
+                    id='firstName'
+                    name='firstName'
+                    required
+                    placeholder='Enter your first name'
+                    className='w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400'
+                  />
+                </div>
+                <div className='flex flex-col w-full'>
+                  <label
+                    htmlFor='lastName'
+                    className='text-sm font-medium text-gray-700'
+                  >
+                    Last Name <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    type='text'
+                    id='lastName'
+                    name='lastName'
+                    required
+                    placeholder='Enter your last name'
+                    className='w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400'
+                  />
+                </div>
+              </div>
+              <div className='flex flex-col gap-2'>
+                <label
+                  htmlFor='email'
+                  className='text-sm font-medium text-gray-700'
+                >
+                  Email <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='email'
+                  id='email'
+                  name='email'
+                  required
+                  placeholder='Enter your email'
+                  className='w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400'
+                />
+              </div>
+              <div className='flex flex-col gap-2'>
+                <label
+                  htmlFor='number'
+                  className='text-sm font-medium text-gray-700'
+                >
+                  Phone Number <span className='text-red-500'>*</span>
+                </label>
+                <input
+                  type='text'
+                  id='number'
+                  name='number'
+                  required
+                  placeholder='Enter your Phone Number'
+                  className='w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400'
+                />
+              </div>
+              <div className='flex flex-col gap-2'>
+                <label
+                  htmlFor='message'
+                  className='text-sm font-medium text-gray-700'
+                >
+                  Event Details
+                </label>
+                <textarea
+                  id='message'
+                  name='message'
+                  rows={4}
+                  placeholder='Tell us about your event (e.g., date, location, rental needs)'
+                  className='w-full px-4 py-2 mt-1 text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400'
+                />
+              </div>
+              <button
+                type='submit'
+                disabled={isSubmitting}
+                className={`px-6 py-3 mt-4 text-white bg-orange-400 rounded-md hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 transition-colors ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            </form>
+          </div>
+        </section>
       <Footer />
     </div>
   );
