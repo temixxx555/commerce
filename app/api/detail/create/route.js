@@ -1,21 +1,12 @@
 import connectDB from "@/config/db";
 import Detail from "@/models/Details";
-import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Ensure DB connection (can also be moved to a top-level module)
+// Ensure DB connection
 connectDB();
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: "Login to send a request" },
-        { status: 401 }
-      );
-    }
-
     const { firstName, lastName, email, message, number } = await request.json();
 
     // Validate required fields
@@ -27,12 +18,12 @@ export async function POST(request) {
     }
 
     const newDetail = await Detail.create({
-      userId,
+      userId: "no user", // Explicitly set for unauthenticated users
       firstName,
       lastName,
       email,
       message,
-      number 
+      number,
     });
 
     return NextResponse.json(
