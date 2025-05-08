@@ -25,7 +25,7 @@ const Navbar = () => {
     { label: "Home", href: "/", icon: <HomeIcon className="w-4 h-4" /> },
     { label: "Shop", href: "/all-products", icon: <BoxIcon className="w-4 h-4" /> },
     { label: "Services", href: "/services", icon: <ServicesIcon className="w-4 h-4" /> },
-    { label: "Blog", href: "/", icon: <BlogIcon className="w-4 h-4" /> },
+    { label: "Blog", href: "/blog", icon: <BlogIcon className="w-4 h-4" /> },
     { label: "Contact Us", href: "/contact", icon: null },
   ];
   return (
@@ -48,7 +48,7 @@ const Navbar = () => {
         <Link href='/services' className='hover:text-gray-900 transition'>
           Services
         </Link>
-        <Link href='/' className='hover:text-gray-900 transition'>
+        <Link href='/blog' className='hover:text-gray-900 transition'>
           Blog
         </Link>
         <Link href='/contact' className='hover:text-gray-900 transition'>
