@@ -115,7 +115,6 @@ const BlogPostPage = () => {
         {/* Post footer - stats */}
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex items-center text-gray-400">
-            <span>{post.views} views</span>
             <span className="mx-2">•</span>
           </div>
         </div>

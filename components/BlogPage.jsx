@@ -81,9 +81,8 @@ const BlogPage = () => {
                     <h2 className="text-xl font-bold text-gray-800 mb-2 md:mb-0">{post.title}</h2>
                     
                     <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-orange-500 text-white mr-2 flex items-center justify-center">
-                        {post.author.charAt(0)}
-                      </div>
+                    <img src="/avatar.jpg" className="w-10 h-10 rounded-full mr-3 flex items-center justify-center" />
+
                       <div>
                         <p className="text-sm font-medium">{post.author}</p>
                         <div className="flex text-xs text-gray-500">
@@ -101,8 +100,6 @@ const BlogPage = () => {
                   {/* Footer with stats and read more button */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-gray-500">
-                      <span>{post.views} views</span>
-                      <span className="mx-2">•</span>
                     </div>
                     
                     <div className="flex items-center">
