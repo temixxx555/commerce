@@ -83,6 +83,7 @@ export const createUserOrder = inngest.createFunction(
           amount: item.amount || 0, // Save amount from event data
           status: "Order Placed",
           date: item.date || Date.now(),
+          sessionId: event.data.sessionId,
         })),
         totalAmount: event.data.totalAmount,
         paymentMethod: event.data.paymentMethod || "Card",

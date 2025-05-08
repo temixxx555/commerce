@@ -1,26 +1,24 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
+import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-
-// Extract the search params logic into a separate component
-function OrderContent() {
+``
+// Extract search params logic to separate component
+function OrdersContent() {
   const { currency, getToken, user } = useAppContext();
   const { useSearchParams } = require("next/navigation");
   const searchParams = useSearchParams();
   const router = useRouter();
   const refresh = searchParams?.get("refresh");
   const [orders, setOrders] = useState([]);
-  const [invoices, setInvoices] = useState([]); // Add state for invoices
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -30,16 +28,16 @@ function OrderContent() {
     setIsMounted(true);
   }, []);
 
-  const fetchOrders = async () => {
+  const fetchSellerOrders = async () => {
     try {
       const token = await getToken();
-      console.log("Fetching orders with token:", token);
-      const { data } = await axios.get("/api/order/list", {
+      console.log("Fetching seller orders with token:", token);
+      const { data } = await axios.get("/api/order/seller-orders", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("API response:", data);
+      console.log("Seller API response:", data);
       if (data.success) {
-        setOrders(data.orders.reverse());
+        setOrders(data.orders.reverse()); // Reverse to show newest first
         setLoading(false);
         setPolling(false);
       } else {
@@ -48,35 +46,18 @@ function OrderContent() {
         setPolling(false);
       }
     } catch (error) {
-      console.error("Fetch orders error:", error);
+      console.error("Fetch seller orders error:", error);
       toast.error(error.message || "Failed to fetch orders");
       setLoading(false);
       setPolling(false);
     }
   };
 
-  const fetchInvoices = async () => {
-    try {
-      const token = await getToken();
-      const { data } = await axios.get("/api/invoices/list", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (data.success) {
-        setInvoices(data.invoices);
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      console.error("Fetch invoices error:", error);
-      toast.error(error.message || "Failed to fetch invoices");
-    }
-  };
-
   useEffect(() => {
+    // Only proceed if component is mounted and user exists
     if (isMounted && user) {
       setLoading(true);
-      fetchOrders();
-      fetchInvoices(); // Fetch invoices
+      fetchSellerOrders();
 
       if (refresh) {
         setPolling(true);
@@ -85,12 +66,11 @@ function OrderContent() {
         const interval = setInterval(() => {
           attempts += 1;
           console.log(`Polling attempt ${attempts}`);
-          fetchOrders();
-          fetchInvoices(); // Poll invoices
+          fetchSellerOrders();
           if (attempts >= maxAttempts) {
             clearInterval(interval);
             setPolling(false);
-            router.replace("/my-orders");
+            router.replace("/seller/orders");
             console.log("Polling stopped after max attempts");
           }
         }, 2000);
@@ -100,112 +80,98 @@ function OrderContent() {
     }
   }, [isMounted, user, refresh, router]);
 
+  // Show nothing during SSR
   if (!isMounted) {
     return null;
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="flex flex-col justify-between px-6 md:px-16 lg:px-32 py-6 min-h-screen">
-        <div className="space-y-5">
-          <h2 className="text-lg font-medium mt-6">My Orders</h2>
-          {loading || polling ? (
-            <Loading />
-          ) : orders.length === 0 ? (
-            <p>No orders found.</p>
-          ) : (
-            <div className="max-w-5xl border-t border-gray-300 text-sm">
-              {orders.map((order, index) => {
-                console.log("Order items:", order.items);
-                const totalAmount = order.items.reduce(
-                  (acc, item) => acc + (item.amount || 0) * item.quantity,
-                  0
-                );
-                // Find matching invoice by sessionId
-                const invoice = invoices.find((inv) => inv.sessionId === order.sessionId);
-                return (
-                  <div
-                    key={index}
-                    className="flex flex-col md:flex-row gap-5 justify-between p-5 border-b border-gray-300"
-                  >
-                    <div className="flex-1 flex gap-5 max-w-80">
-                      <Image
-                        className="max-w-16 max-h-16 object-cover"
-                        src={assets.box_icon}
-                        alt="box_icon"
-                      />
-                      <p className="flex flex-col gap-3">
-                        <span className="font-medium text-base">
-                          {order.items
-                            .map((item) =>
-                              item.product
-                                ? `${item.product.name} x ${item.quantity}`
-                                : "Unknown Product"
-                            )
-                            .join(", ")}
-                        </span>
-                        <span>Items: {order.items.length}</span>
-                      </p>
-                    </div>
-                    <div>
-                      <p>
-                        <span className="font-medium">{order.address.fullName}</span>
-                        <br />
-                        <span>{order.address.area}</span>
-                        <br />
-                        <span>{`${order.address.city}, ${order.address.state}`}</span>
-                        <br />
-                        <span>{order.address.phoneNumber}</span>
-                      </p>
-                    </div>
-                    <p className="font-medium my-auto">
-                      {currency}
-                      {isNaN(totalAmount)
-                        ? "N/A"
-                        : totalAmount.toLocaleString("en-CA", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
+    <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
+      {loading || polling ? (
+        <Loading />
+      ) : orders.length === 0 ? (
+        <p className="p-4">No orders found.</p>
+      ) : (
+        <div className="md:p-10 p-4 space-y-5">
+          <h2 className="text-lg font-medium">Orders</h2>
+          <div className="max-w-4xl rounded-md border-t border-gray-300">
+            {orders.map((order, index) => {
+              console.log("Seller order items:", order.items);
+              const totalAmount = order.items.reduce(
+                (acc, item) => acc + (item.amount || 0) * item.quantity,
+                0
+              );
+              return (
+                <div
+                  key={index}
+                  className="flex flex-col md:flex-row gap-5 justify-between p-5 border-b border-gray-300"
+                >
+                  <div className="flex-1 flex gap-5 max-w-80">
+                    <Image
+                      className="max-w-16 max-h-16 object-cover"
+                      src={assets.box_icon}
+                      alt="box_icon"
+                    />
+                    <p className="flex flex-col gap-3">
+                      <span className="font-medium text-base">
+                        {order.items
+                          .map((item) =>
+                            item.product
+                              ? `${item.product.name} x ${item.quantity}`
+                              : "Unknown Product"
+                          )
+                          .join(", ")}
+                      </span>
+                      <span>Items: {order.items.length}</span>
                     </p>
-                    <div>
-                      <p className="flex flex-col">
-                        <span>Method: {order.paymentMethod || "Card"}</span>
-                        <span>
-                          Date: {new Date(order.items[0]?.date).toLocaleDateString()}
-                        </span>
-                        <span>Payment: {order.paymentStatus || "Paid"}</span>
-                        {invoice && invoice.invoiceUrl && (
-                          <a
-                            href={invoice.invoiceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            View Invoice
-                          </a>
-                        )}
-                      </p>
-                    </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                  <div>
+                    <p>
+                      <span className="font-medium">{order.address.fullName}</span>
+                      <br />
+                      <span>{order.address.area}</span>
+                      <br />
+                      <span>{`${order.address.city}, ${order.address.state}`}</span>
+                      <br />
+                      <span>{order.address.phoneNumber}</span>
+                    </p>
+                  </div>
+                  <p className="font-medium my-auto">
+                    {currency}
+                    {isNaN(totalAmount)
+                      ? "N/A"
+                      : totalAmount.toLocaleString("en-CA", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                  </p>
+                  <div>
+                    <p className="flex flex-col">
+                      <span>Method: {order.paymentMethod || "Card"}</span>
+                      <span>
+                        Date: {new Date(order.items[0]?.date).toLocaleDateString()}
+                      </span>
+                      <span>Payment: {order.paymentStatus || "Paid"}</span>
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
       <Footer />
-    </>
+    </div>
   );
 }
 
 // Main component with Suspense boundary
-const MyOrders = () => {
+const Orders = () => {
   return (
     <Suspense fallback={<Loading />}>
-      <OrderContent />
+      <OrdersContent />
     </Suspense>
   );
 };
 
-export default MyOrders;
+export default Orders;

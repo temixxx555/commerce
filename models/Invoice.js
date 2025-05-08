@@ -1,20 +1,14 @@
-import { NextResponse } from "next/server";
-import connectDB from "@/config/db";
-import Invoice from "@/models/Invoice";
-import { getAuth } from "@clerk/nextjs/server";
+import mongoose from "mongoose";
 
-export async function GET(req) {
-  try {
-    await connectDB();
-    const { userId } = getAuth(req);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+const invoiceSchema = new mongoose.Schema({
+  invoiceId: { type: String, required: true, unique: true },
+  sessionId: { type: String, required: true },
+  userId: { type: String, required: true, ref: "user" },
+  amount: { type: Number, required: true },
+  status: { type: String, required: true },
+  created: { type: Number, required: true },
+  invoiceUrl: { type: String, required: true }, // Store hosted_invoice_url
+});
 
-    const invoices = await Invoice.find({ userId }).sort({ created: -1 });
-    return NextResponse.json({ success: true, invoices });
-  } catch (err) {
-    console.error("Invoices API Error:", err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
-}
+const Invoice = mongoose.models.invoice || mongoose.model("invoice", invoiceSchema);
+export default Invoice;

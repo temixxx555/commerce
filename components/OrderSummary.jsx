@@ -17,8 +17,10 @@ const OrderSummary = () => {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUserAddresses = async () => {
+    setIsLoading(true);
     try {
       const token = await getToken();
       const { data } = await axios.get("/api/user/get-address", {
@@ -34,7 +36,10 @@ const OrderSummary = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Failed to fetch addresses");
+      console.error("Error fetching addresses:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,13 +88,16 @@ const OrderSummary = () => {
         toast.error(data.message || "Failed to create checkout session");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Error processing order");
+      console.error("Order creation error:", error);
     }
   };
 
   useEffect(() => {
     if (user) {
       fetchUserAddresses();
+    } else {
+      setIsLoading(false);
     }
   }, [user]);
 
@@ -106,12 +114,17 @@ const OrderSummary = () => {
             <button
               className="peer w-full text-left px-4 pr-2 py-2 bg-white text-gray-700 focus:outline-none"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              disabled={isLoading}
             >
-              <span>
-                {selectedAddress
-                  ? `${selectedAddress.fullName}, ${selectedAddress.area}, ${selectedAddress.city}, ${selectedAddress.state}`
-                  : "Select Address"}
-              </span>
+              {isLoading ? (
+                <span>Loading addresses...</span>
+              ) : selectedAddress ? (
+                <span>
+                  {selectedAddress.fullName}, {selectedAddress.area}, {selectedAddress.city}, {selectedAddress.state}
+                </span>
+              ) : (
+                <span>No address selected</span>
+              )}
               <svg
                 className={`w-5 h-5 inline float-right transition-transform duration-200 ${
                   isDropdownOpen ? "rotate-0" : "-rotate-90"
@@ -132,15 +145,19 @@ const OrderSummary = () => {
 
             {isDropdownOpen && (
               <ul className="absolute w-full bg-white border shadow-md mt-1 z-10 py-1.5">
-                {userAddresses.map((address, index) => (
-                  <li
-                    key={index}
-                    className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer"
-                    onClick={() => handleAddressSelect(address)}
-                  >
-                    {address.fullName}, {address.area}, {address.city}, {address.state}
-                  </li>
-                ))}
+                {userAddresses.length > 0 ? (
+                  userAddresses.map((address, index) => (
+                    <li
+                      key={index}
+                      className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer"
+                      onClick={() => handleAddressSelect(address)}
+                    >
+                      {address.fullName}, {address.area}, {address.city}, {address.state}
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-4 py-2 text-gray-500">No addresses found</li>
+                )}
                 <li
                   onClick={() => router.push("/add-address")}
                   className="px-4 py-2 hover:bg-gray-500/10 cursor-pointer text-center"
@@ -201,9 +218,14 @@ const OrderSummary = () => {
 
       <button
         onClick={createOrder}
-        className="w-full bg-orange-600 text-white py-3 mt-5 hover:bg-orange-700"
+        disabled={!selectedAddress || isLoading}
+        className={`w-full py-3 mt-5 ${
+          !selectedAddress || isLoading
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-orange-600 hover:bg-orange-700"
+        } text-white`}
       >
-        Place Order
+        {isLoading ? "Loading..." : "Place Order"}
       </button>
     </div>
   );

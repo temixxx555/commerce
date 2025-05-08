@@ -1,25 +1,22 @@
+// src/models/Order.js
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  userId: { type: String, required: true, ref: "user" },
-  address: { type: String, required: true, ref: "address" },
+const OrderSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  address: { type: mongoose.Schema.Types.ObjectId, ref: "Address", required: true },
   items: [
     {
-      product: { type: String, required: true, ref: "product" },
+      product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" }, // Match Product model name
       quantity: { type: Number, required: true },
-      amount: { type: Number, required: false },
+      amount: { type: Number, required: true },
       status: { type: String, default: "Order Placed" },
-      date: { type: Number, default: Date.now },
+      date: { type: Date, default: Date.now },
     },
   ],
-  sessionId: { type: String, unique: true }, // Added to match webhook usage
+  totalAmount: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
+  paymentMethod: { type: String, default: "Card" },
+  paymentStatus: { type: String, default: "Paid" },
 });
 
-let Orderd;
-try {
-  Orderd = mongoose.models.orderd || mongoose.model("orderd", orderSchema);
-} catch (err) {
-  console.error("Orderd - Model registration error:", err.message);
-  Orderd = mongoose.model("orderd", orderSchema);
-}
-export default Orderd;
+export default mongoose.models.Order || mongoose.model("Order", OrderSchema, "orders");
