@@ -47,10 +47,14 @@ import product_details_page_apple_earphone_image3 from "./product_details_page_a
 import product_details_page_apple_earphone_image4 from "./product_details_page_apple_earphone_image4.png";
 import product_details_page_apple_earphone_image5 from "./product_details_page_apple_earphone_image5.png";
 import party from "./party.png";
-import outdoor from "./outdoor.jpg";
-import outdoor2 from "./outdoor2.jpg";
+import outdoor from "./rentals.jpeg";
+import outdoor2 from "./rentals2.jpeg";
+import contact from "./contact.svg"
+import Edit from "./Editsvg.svg"
 
 export const assets = {
+  Edit,
+  contact,
   outdoor2,
   outdoor,
   party,

@@ -79,6 +79,9 @@ const AddAddress = () => {
     e.preventDefault();
     try {
       const token = await getToken();
+        if (!token) {
+        return toast.error("cant access token");
+      }
       const { data } = await axios.post(
         "/api/user/add-address",
         { address },
@@ -89,7 +92,7 @@ const AddAddress = () => {
         toast.success(data.message);
         router.push("/cart");
       } else {
-        toast.error("Please log in to add a new address");
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);

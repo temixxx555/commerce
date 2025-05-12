@@ -7,7 +7,7 @@ const Banner = () => {
     <div className="flex flex-col md:flex-row items-center justify-between md:pl-20 py-14 md:py-0 bg-[#E6E9F2] my-16 rounded-xl overflow-hidden">
       <Image
         className="max-w-56"
-        src={assets.jbl_soundbox_image}
+        src={assets.outdoor2}
         alt="jbl_soundbox_image"
       />
       <div className="flex flex-col items-center justify-center text-center space-y-2 px-4 md:px-0">
