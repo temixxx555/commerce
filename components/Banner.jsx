@@ -16,7 +16,7 @@ const Banner = () => {
         </h2>
         <p className="font-bold text-orange-500 ">With J3 Party <span className="text-black font-normal">Rentals</span> </p>
         <button className="group flex items-center justify-center gap-1 px-12 py-2.5 bg-orange-600 rounded text-white">
-          Book now
+          Rent now
           <Image className="group-hover:translate-x-1 transition" src={assets.arrow_icon_white} alt="arrow_icon_white" />
         </button>
       </div>

@@ -57,7 +57,7 @@ export default function Home() {
       <Navbar />
       <section
         className='relative flex flex-col items-center justify-center h-screen bg-no-repeat bg-cover bg-center'
-        style={{ backgroundImage: `url(/pic.png)` }}
+        style={{ backgroundImage: `url(/pic.jpeg)` }}
         aria-label='J3 Party Rentals Services'
       >
         {/* Overlay for text readability */}

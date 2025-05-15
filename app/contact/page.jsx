@@ -103,7 +103,7 @@ const Contact = () => {
                     href='mailto:support@j3partyrentals.com'
                     className='hover:text-orange-400'
                   >
-                    support@j3partyrentals.com
+                    bernardinho4sure@gmail.com
                   </a>
                 </li>
                 <li className='flex items-center'>
@@ -122,7 +122,7 @@ const Contact = () => {
                     />
                   </svg>
                   <a href='tel:+1234567890' className='hover:text-orange-400'>
-                    +1 (234) 567-890
+                    +1 6477121057
                   </a>
                 </li>
                 <li className='flex items-center'>
@@ -146,7 +146,7 @@ const Contact = () => {
                       d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
                     />
                   </svg>
-                  <span>123 Party Lane, Celebration City, CA 90210</span>
+                  <span>Chandos crt, Oshawa, Ontario, Canada</span>
                 </li>
               </ul>
               <div className='mt-6'>
@@ -155,10 +155,10 @@ const Contact = () => {
                 </h3>
                 <div className='flex space-x-4'>
                   <a
-                    href='https://facebook.com/j3partyrentals'
+                    href='https://www.facebook.com/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-gray-600 hover:text-orange-400'
+                    className='text-blue-600 hover:text-orange-400'
                   >
                     <svg
                       className='w-6 h-6'
@@ -172,7 +172,7 @@ const Contact = () => {
                     href='https://instagram.com/j3partyrentals'
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-gray-600 hover:text-orange-400'
+                    className='text-pink-600 hover:text-orange-400'
                   >
                     <svg
                       className='w-6 h-6'
@@ -190,11 +190,11 @@ const Contact = () => {
                 Business Hours
               </h3>
               <p className='text-gray-600'>
-                Monday - Friday: 9:00 AM - 6:00 PM
+                Monday - Friday: 8:00 am – 8:00 pm
                 <br />
-                Saturday: 10:00 AM - 4:00 PM
+                Saturday: 9:00 AM - 7:00 PM
                 <br />
-                Sunday: Closed
+                Sunday: 10:00 am – 7:00 pm
               </p>
             </div>
           </div>
@@ -313,7 +313,7 @@ const Contact = () => {
             </h2>
             <div className='aspect-w-16 aspect-h-9'>
               <iframe
-                src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019587849685!2d-122.4194156846813!3d37.77492977975966!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDQ2JzI5LjciTiAxMjLCsDI1JzA5LjkiVw!5e0!3m2!1sen!2sus!4v1631234567890!5m2!1sen!2sus'
+               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2876.4379457794926!2d-78.85563932532003!3d43.86747703854787!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d51d44301b3ef9%3A0x4e13b2ce1dcf76f7!2sChandos%20Ct%2C%20Oshawa%2C%20ON%2C%20Canada!5e0!3m2!1sen!2sng!4v1747320575310!5m2!1sen!2sng"
                 width='100%'
                 height='450'
                 style={{ border: 0 }}
