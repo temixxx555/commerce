@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar"; // Adjust path to your Navbar component
 import Footer from "@/components/Footer"; // Adjust path to your Footer component
 import { useAppContext } from "@/context/AppContext";
+import { Facebook, Instagram } from "lucide-react";
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -160,27 +161,15 @@ const Contact = () => {
                     rel='noopener noreferrer'
                     className='text-blue-600 hover:text-orange-400'
                   >
-                    <svg
-                      className='w-6 h-6'
-                      fill='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-2v4h-3v-4h-2v-2h2V9c0-1.66 1.34-3 3-3h2v2h-2c-.55 0-1 .45-1 1v2h3v2z' />
-                    </svg>
+                   <Facebook className="w-6 h-6"/>
                   </a>
                   <a
-                    href='https://instagram.com/j3partyrentals'
+                    href='https://www.instagram.com/j3_rentals?igsh=MWZ3bmppcDM2aWMyNg=='
                     target='_blank'
                     rel='noopener noreferrer'
                     className='text-pink-600 hover:text-orange-400'
                   >
-                    <svg
-                      className='w-6 h-6'
-                      fill='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 7h-2.93c.52-.79.93-1.72.93-2.75 0-.69-.56-1.25-1.25-1.25h-1.5v6h1.5c.69 0 1.25-.56 1.25-1.25 0-.97-.52-1.79-1.25-2.25.73-.46 1.25-1.28 1.25-2.25zm-5 0h-1.5v6h1.5c.69 0 1.25-.56 1.25-1.25s-.56-1.25-1.25-1.25z' />
-                    </svg>
+                   <Instagram className="w-6 h-6" />
                   </a>
                 </div>
               </div>

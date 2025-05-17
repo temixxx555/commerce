@@ -117,7 +117,7 @@ const Product = () => {
                             Add to Cart
                         </button>
                         <button onClick={() => { addToCart(productData._id); router.push('/cart') }} className="w-full py-3.5 bg-orange-500 text-white hover:bg-orange-600 transition">
-                            Buy now
+                            Rent now
                         </button>
                     </div>
                 </div>
